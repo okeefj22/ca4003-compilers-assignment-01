@@ -40,7 +40,7 @@ public class CCALParser {
 	
 	    System.out.println("CCAL Parser: Usage is one of:");
 	    System.out.println("	java CCALParser < inputfile");
-	    System.out.prinln("OR");
+	    System.out.println("OR");
 	    System.out.println("	java CCALParser inputfile");
 	    return;
 	}
@@ -84,10 +84,10 @@ SKIP : /*** Ignoring spaces/tabs/newlines ***/
 
 SKIP : /* MULTI-LINE COMMENTS */
 {
-    "/*" { commentNesting++; } : MULTI_LINE_COMMENT
+    "/*" { commentNesting++; } : IN_COMMENT
 }
 
-<MULTI_LINE_COMMENT> SKIP :
+<IN_COMMENT> SKIP :
 {
     "/*" { commentNesting++; }
   | "*/" { commentNesting--; if (commentNesting == 0) { SwitchTo(DEFAULT); }} 
@@ -96,13 +96,7 @@ SKIP : /* MULTI-LINE COMMENTS */
 
 SKIP : /* SINGLE-LINE COMMENT */
 {
-    "//" : SINGLE_LINE_COMMENT
-}
-
-<SINGLE_LINE_COMMENT> SKIP :
-{
-    ["\n", "\r", "\f"] { SwitchTo(DEFAULT); }
-  | <~[]>
+    < "//" (~["\n"])* "\n" >
 }
 
 TOKEN : /* KEYWORDS */
@@ -160,3 +154,128 @@ TOKEN : /* Anything not recognised so far */
  ***** SECTION 4 - THE GRAMMAR *****
  ***********************************/
 
+void Prog() : {}
+{
+    DeclList() FuncList() Main()
+}
+
+/* TODO unsure about representation of (<decl> ; <decl_list> | e)
+void DeclList() : {}
+{
+    (Decl() <SEMIC> [DeclList()])
+}
+
+void Decl() : {}
+{
+    VarDecl()
+  | ConstDecl()
+}
+
+void VarDecl() : {}
+{
+    (<VAR> <ID> <COLON> Type())
+}
+
+void ConstDecl() : {}
+{
+    (<CONST> <ID> <COLON> Type() <ASSIGN> Expr())
+}
+
+void FuncList() : {}
+{
+    (Func() [FuncList()])
+}
+
+void Func() : {}
+{
+    (Type() <ID> <LPAREN> ParamList() <RPAREN> <LBRACE> DeclList() StmBlk() <RETURN> <LPAREN> [Expr()] <RPAREN> <SEMIC> <RBRACE>)
+}
+
+void Type() : {}
+{
+    <INT>
+  | <BOOL>
+  | <VOID>
+}
+
+void ParamList() : {}
+{
+    [NempParamList()]   
+}
+
+void NempParamList() : {}
+{
+    (<ID> <COLON> Type())
+  | (<ID> <COLON> Type() <COMMA> NempParamList())
+}
+
+void Main() : {}
+{
+    (<MAIN> <LBRACE> DeclList() StmBlk() <RBRACE>)
+}
+
+void StmBlk() : {}
+{
+    [(Stm() StmBlk())]
+}
+
+void Stm() : {}
+{
+    (<ID> <ASSIGN> Expr() <SEMIC>) 
+  | (<ID> <LPAREN> ArgList() <RPAREN> <SEMIC>)
+  | (<LBRACE> StmBlk() <LBRACE>)
+  | (<IF> Cond() <LBRACE> StmBlk() <RBRACE> <ELSE> <LBRACE> StmBlk() <RBRACE>)
+  | (<WHILE> Cond() <LBRACE> StmBlk() <RBRACE>)
+  | (<SKIP> <SEMIC>)
+}
+
+void Expr() : {}
+{
+    (Frag() BinOp() Frag())
+  | (<LPAREN> Expr() <RPAREN>)
+  | (<ID> <LPAREN> ArgList() <RPAREN>)
+}
+
+void BinOp() : {}
+{
+    <PLUS> 
+  | <MINUS>
+}
+
+void Frag() : {}
+{
+    <ID>
+  | <INTEGER>
+  | <TRUE>
+  | <FALSE>
+  | Expr()
+}
+
+void Cond() : {}
+{
+    (<NEGATE> Cond())
+  | (<LPAREN> Cond() <RPAREN>)
+  | (Expr() CompOp() Expr())
+  | (Cond() (<OR> | <AND>) Cond())
+}
+
+void CompOp() : {}
+{
+    <EQ>
+  | <NOT_EQ>
+  | <LT>
+  | <LT_EQ>
+  | <GT>
+  | <GT_EQ>
+}
+
+void ArgList() : {}
+{
+    [NempArgList()]
+}
+
+void NempArgList() : {}
+{
+    <ID>
+  | (<ID> <COMMA> NempArgList())
+}
