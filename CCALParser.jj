@@ -1,0 +1,162 @@
+/*******************************
+ ***** SECTION 1 - OPTIONS *****
+ *******************************/
+
+options {
+    JAVA_UNICODE_ESCAPE = true;
+} 
+
+
+/*********************************
+ ***** SECTION 2 - USER CODE *****
+ *********************************/
+
+PARSER_BEGIN(CCALParser)
+
+public class CCALParser {
+
+    public static void main(String[] args) {
+
+	// Initialise parser to read from appropriate place
+        CCALParser parser;
+        if (args.length == 0) {
+
+            System.out.println("Reading from standard input...");
+            parser = new CCALParser(System.in);
+
+        } else if (args.length == 1) {
+
+            try {
+
+		parser = new CCALParser(new java.io.FileInputStream(args[0])); 
+
+            } catch (java.io.FileNotFoundException e) {
+	    
+		System.err.println("File " + args[0] + " not found.");
+		return;
+	    }
+
+        } else {
+	
+	    System.out.println("CCAL Parser: Usage is one of:");
+	    System.out.println("	java CCALParser < inputfile");
+	    System.out.prinln("OR");
+	    System.out.println("	java CCALParser inputfile");
+	    return;
+	}
+
+
+	// Parse the file
+	try {
+
+	    parser.Prog();
+	    System.out.println("CCAL Parser: CCAL program parsed successfully.");
+
+	} catch (ParseException e) {
+	
+	
+	    System.out.println(e.getMessage());
+	    System.out.println("CCAL Parser: Encountered errors during parse.")
+	}
+
+    }
+}
+
+PARSER_END(CCALParser)
+
+/*****************************************
+ ***** SECTION 3 - TOKEN DEFINITIONS *****
+ *****************************************/
+
+TOKEN_MGR_DECLS :
+{
+    static int commentNesting = 0;
+}
+
+SKIP : /*** Ignoring spaces/tabs/newlines ***/
+{
+    " "
+  | "\t"
+  | "\n" 
+  | "\r" 
+  | "\f" 
+}
+
+SKIP : /* MULTI-LINE COMMENTS */
+{
+    "/*" { commentNesting++; } : MULTI_LINE_COMMENT
+}
+
+<MULTI_LINE_COMMENT> SKIP :
+{
+    "/*" { commentNesting++; }
+  | "*/" { commentNesting--; if (commentNesting == 0) { SwitchTo(DEFAULT); }} 
+  | <~[]> 
+}
+
+SKIP : /* SINGLE-LINE COMMENT */
+{
+    "//" : SINGLE_LINE_COMMENT
+}
+
+<SINGLE_LINE_COMMENT> SKIP :
+{
+    ["\n", "\r", "\f"] { SwitchTo(DEFAULT); }
+  | <~[]>
+}
+
+TOKEN : /* KEYWORDS */
+{
+    < VAR : "var" >
+  | < CONST : "const" >
+  | < RETURN : "return" >
+  | < INT : "integer" >
+  | < BOOL : "boolean" >
+  | < VOID : "void" >
+  | < MAIN : "main" >
+  | < IF : "if" >
+  | < ELSE : "else" >
+  | < WHILE : "while" >
+  | < SKIP : "skip" >
+}
+
+TOKEN : /* PUNCTUATION */
+{
+    < COMMA : "," >
+  | < SEMIC : ";" >
+  | < COLON : ":" >
+  | < ASSIGN : "=" >
+  | < LBRACE : "{" >
+  | < RBRACE : "}" >
+  | < LPAREN : "(" >
+  | < RBRACE : ")" >
+  | < PLUS : "+" >
+  | < MINUS : "-" >
+  | < NEGATE : "~" >
+  | < OR : "||" >
+  | < AND : "&&" >
+  | < EQ : "==" >
+  | < NOT_EQ : "!=" >
+  | < LT : "<" >
+  | < LT_EQ : "<=" >
+  | < GT : ">" >
+  | < GT_EQ : ">=" >
+}
+
+TOKEN : /* VALUES */
+{
+    < INTEGER : (<MINUS>)?["1" - "9"](<DIGIT>)* >
+  | < ID : <LETTER>([<LETTER>, <DIGIT>, "_"])* >
+  | < #DIGIT : ["0" - "9"] >
+  | < #LETTER : ["a" - "z", "A" - "Z"] >
+}
+
+TOKEN : /* Anything not recognised so far */
+{
+    < OTHER : ~[] >
+}
+
+/***********************************
+ ***** SECTION 4 - THE GRAMMAR *****
+ ***********************************/
+
