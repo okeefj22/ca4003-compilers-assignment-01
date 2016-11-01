@@ -123,7 +123,7 @@ TOKEN : /* PUNCTUATION */
   | < LBRACE : "{" >
   | < RBRACE : "}" >
   | < LPAREN : "(" >
-  | < RBRACE : ")" >
+  | < RPAREN : ")" >
   | < PLUS : "+" >
   | < MINUS : "-" >
   | < NEGATE : "~" >
@@ -145,6 +145,12 @@ TOKEN : /* VALUES */
   | < #LETTER : ["a" - "z", "A" - "Z"] >
 }
 
+TOKEN : /* BOOLEAN VALUES TODO CHECK */
+{
+    < TRUE : "true" >
+  | < FALSE : "false" >
+}
+
 TOKEN : /* Anything not recognised so far */
 {
     < OTHER : ~[] >
@@ -159,7 +165,7 @@ void Prog() : {}
     DeclList() FuncList() Main()
 }
 
-/* TODO unsure about representation of (<decl> ; <decl_list> | e)
+/* TODO unsure about representation of (<decl> ; <decl_list> | e) */
 void DeclList() : {}
 {
     (Decl() <SEMIC> [DeclList()])
@@ -279,3 +285,4 @@ void NempArgList() : {}
     <ID>
   | (<ID> <COMMA> NempArgList())
 }
+
