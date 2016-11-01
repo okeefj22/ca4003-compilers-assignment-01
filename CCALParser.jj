@@ -4,6 +4,7 @@
 
 options {
     JAVA_UNICODE_ESCAPE = true;
+    IGNORE_CASE = true;
 } 
 
 
@@ -110,6 +111,8 @@ TOKEN : /* KEYWORDS */
   | < MAIN : "main" >
   | < IF : "if" >
   | < ELSE : "else" >
+  | < TRUE : "true" >
+  | < FALSE : "false" >
   | < WHILE : "while" >
   | < SKP : "skip" >
 }
@@ -143,12 +146,6 @@ TOKEN : /* VALUES */
   | < ID : <LETTER> (<LETTER> | <DIGIT> | "_")* >
   | < #DIGIT : ["0" - "9"] >
   | < #LETTER : ["a" - "z", "A" - "Z"] >
-}
-
-TOKEN : /* BOOLEAN VALUES TODO CHECK */
-{
-    < TRUE : "true" >
-  | < FALSE : "false" >
 }
 
 TOKEN : /* Anything not recognised so far */
