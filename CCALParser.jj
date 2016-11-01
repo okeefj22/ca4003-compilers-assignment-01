@@ -56,7 +56,7 @@ public class CCALParser {
 	
 	
 	    System.out.println(e.getMessage());
-	    System.out.println("CCAL Parser: Encountered errors during parse.")
+	    System.out.println("CCAL Parser: Encountered errors during parse.");
 	}
 
     }
@@ -111,7 +111,7 @@ TOKEN : /* KEYWORDS */
   | < IF : "if" >
   | < ELSE : "else" >
   | < WHILE : "while" >
-  | < SKIP : "skip" >
+  | < SKP : "skip" >
 }
 
 TOKEN : /* PUNCTUATION */
@@ -139,8 +139,8 @@ TOKEN : /* PUNCTUATION */
 
 TOKEN : /* VALUES */
 {
-    < INTEGER : (<MINUS>)?["1" - "9"](<DIGIT>)* >
-  | < ID : <LETTER>([<LETTER>, <DIGIT>, "_"])* >
+    < INTEGER : (<MINUS>)? ["1" - "9"] (<DIGIT>)* >
+  | < ID : <LETTER> (<LETTER> | <DIGIT> | "_")* >
   | < #DIGIT : ["0" - "9"] >
   | < #LETTER : ["a" - "z", "A" - "Z"] >
 }
@@ -226,7 +226,7 @@ void Stm() : {}
   | (<LBRACE> StmBlk() <LBRACE>)
   | (<IF> Cond() <LBRACE> StmBlk() <RBRACE> <ELSE> <LBRACE> StmBlk() <RBRACE>)
   | (<WHILE> Cond() <LBRACE> StmBlk() <RBRACE>)
-  | (<SKIP> <SEMIC>)
+  | (<SKP> <SEMIC>)
 }
 
 void Expr() : {}
