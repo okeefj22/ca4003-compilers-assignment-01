@@ -18,7 +18,7 @@ public class CCALParser {
 
     public static void main(String[] args) {
 
-	// Initialise parser to read from appropriate place
+        // Initialise parser to read from appropriate place
         CCALParser parser;
         if (args.length == 0) {
 
@@ -29,36 +29,36 @@ public class CCALParser {
 
             try {
 
-		parser = new CCALParser(new java.io.FileInputStream(args[0])); 
+                parser = new CCALParser(new java.io.FileInputStream(args[0])); 
 
             } catch (java.io.FileNotFoundException e) {
-	    
-		System.err.println("File " + args[0] + " not found.");
-		return;
-	    }
+
+                System.err.println("File " + args[0] + " not found.");
+                return;
+            }
 
         } else {
-	
-	    System.out.println("CCAL Parser: Usage is one of:");
-	    System.out.println("	java CCALParser < inputfile");
-	    System.out.println("OR");
-	    System.out.println("	java CCALParser inputfile");
-	    return;
-	}
+    
+        System.out.println("CCAL Parser: Usage is one of:");
+        System.out.println("    java CCALParser < inputfile");
+        System.out.println("OR");
+        System.out.println("    java CCALParser inputfile");
+        return;
+    }
 
 
-	// Parse the file
-	try {
+    // Parse the file
+    try {
 
-	    parser.Prog();
-	    System.out.println("CCAL Parser: CCAL program parsed successfully.");
+        parser.Prog();
+        System.out.println("CCAL Parser: CCAL program parsed successfully.");
 
-	} catch (ParseException e) {
-	
-	
-	    System.out.println(e.getMessage());
-	    System.out.println("CCAL Parser: Encountered errors during parse.");
-	}
+    } catch (ParseException e) {
+    
+    
+        System.out.println(e.getMessage());
+        System.out.println("CCAL Parser: Encountered errors during parse.");
+    }
 
     }
 }
@@ -142,7 +142,7 @@ TOKEN : /* PUNCTUATION */
 
 TOKEN : /* VALUES */
 {
-    < INTEGER : (<MINUS>)? ["1" - "9"] (<DIGIT>)* >
+    < NUMBER : (<MINUS>)? ["1" - "9"] (<DIGIT>)* >
   | < ID : <LETTER> (<LETTER> | <DIGIT> | "_")* >
   | < #DIGIT : ["0" - "9"] >
   | < #LETTER : ["a" - "z", "A" - "Z"] >
@@ -208,8 +208,12 @@ void ParamList() : {}
 
 void NempParamList() : {}
 {
-    (<ID> <COLON> Type())
-  | (<ID> <COLON> Type() <COMMA> NempParamList())
+    (<ID> <COLON> Type() NempParamListPrime())
+}
+
+void NempParamListPrime() : {}
+{
+    [<COMMA> NempParamList()]
 }
 
 void Main() : {}
@@ -219,24 +223,34 @@ void Main() : {}
 
 void StmBlk() : {}
 {
-    [(Stm() StmBlk())]
+    [Stm() StmBlk()]
 }
 
 void Stm() : {}
 {
-    (<ID> <ASSIGN> Expr() <SEMIC>) 
-  | (<ID> <LPAREN> ArgList() <RPAREN> <SEMIC>)
+    (<ID> StmPrime())
   | (<LBRACE> StmBlk() <LBRACE>)
   | (<IF> Cond() <LBRACE> StmBlk() <RBRACE> <ELSE> <LBRACE> StmBlk() <RBRACE>)
   | (<WHILE> Cond() <LBRACE> StmBlk() <RBRACE>)
   | (<SKP> <SEMIC>)
 }
 
+void StmPrime() : {}
+{
+    <ASSIGN> Expr() <SEMIC>
+  | <LPAREN> ArgList() <RPAREN> <SEMIC>
+}
+
 void Expr() : {}
 {
-    (Frag() BinOp() Frag())
-  | (<LPAREN> Expr() <RPAREN>)
-  | (<ID> <LPAREN> ArgList() <RPAREN>)
+    (Frag() Term())
+  | (Bool() Term())
+  | (<LPAREN> Expr() <RPAREN> Term())
+}
+
+void Term() : {}
+{
+    [BinOp() Expr()]
 }
 
 void BinOp() : {}
@@ -247,19 +261,28 @@ void BinOp() : {}
 
 void Frag() : {}
 {
-    <ID>
-  | <INTEGER>
-  | <TRUE>
+    <ID> [<LPAREN> ArgList() <RPAREN>]
+  | <MINUS> <ID>
+  | <NUMBER>
+}
+
+void Bool() : {}
+{
+    <TRUE>
   | <FALSE>
-  | Expr()
 }
 
 void Cond() : {}
 {
-    (<NEGATE> Cond())
-  | (<LPAREN> Cond() <RPAREN>)
-  | (Expr() CompOp() Expr())
-  | (Cond() (<OR> | <AND>) Cond())
+    (<NEGATE> Cond() CondPrime())
+  | (<LPAREN> Cond() <RPAREN> CondPrime())
+  | (Expr() CompOp() Expr() CondPrime())
+}
+
+void CondPrime() : {}
+{
+    <OR> Cond()
+  | <AND> Cond()
 }
 
 void CompOp() : {}
@@ -279,7 +302,6 @@ void ArgList() : {}
 
 void NempArgList() : {}
 {
-    <ID>
-  | (<ID> <COMMA> NempArgList())
+    <ID> [<COMMA> NempArgList()]
 }
 
