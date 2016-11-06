@@ -1,5 +1,5 @@
-main
-{
+main {
+
     // a simple comment
-    /∗ a comment /∗ with /∗ s e v e r a l ∗/ n e s t e d ∗/ comments ∗/
+    /* a /* simple /* comment */ to */ demo something idk */
 }
