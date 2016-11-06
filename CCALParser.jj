@@ -142,7 +142,7 @@ TOKEN : /* PUNCTUATION */
 
 TOKEN : /* VALUES */
 {
-    < NUMBER : (<MINUS>)? ["1" - "9"] (<DIGIT>)* >
+    < NUMBER : "0" | ((<MINUS>)? ["1" - "9"] (<DIGIT>)*) >
   | < ID : <LETTER> (<LETTER> | <DIGIT> | "_")* >
   | < #DIGIT : ["0" - "9"] >
   | < #LETTER : ["a" - "z", "A" - "Z"] >
@@ -162,10 +162,9 @@ void Prog() : {}
     DeclList() FuncList() Main()
 }
 
-/* TODO unsure about representation of (<decl> ; <decl_list> | e) */
 void DeclList() : {}
 {
-    (Decl() <SEMIC> [DeclList()])
+    [Decl() <SEMIC> DeclList()]
 }
 
 void Decl() : {}
@@ -186,7 +185,7 @@ void ConstDecl() : {}
 
 void FuncList() : {}
 {
-    (Func() [FuncList()])
+    [Func() FuncList()]
 }
 
 void Func() : {}
@@ -223,7 +222,7 @@ void Main() : {}
 
 void StmBlk() : {}
 {
-    [Stm() StmBlk()]
+    [LOOKAHEAD(2) Stm() StmBlk()]
 }
 
 void Stm() : {}
@@ -275,7 +274,7 @@ void Bool() : {}
 void Cond() : {}
 {
     (<NEGATE> Cond() CondPrime())
-  | (<LPAREN> Cond() <RPAREN> CondPrime())
+  | LOOKAHEAD(3) (<LPAREN> Cond() <RPAREN> CondPrime())
   | (Expr() CompOp() Expr() CondPrime())
 }
 
@@ -283,6 +282,7 @@ void CondPrime() : {}
 {
     <OR> Cond()
   | <AND> Cond()
+  | {}
 }
 
 void CompOp() : {}
