@@ -222,7 +222,8 @@ void Main() : {}
 
 void StmBlk() : {}
 {
-    [LOOKAHEAD(2) Stm() StmBlk()]
+    Stm() StmBlk()
+  | {}
 }
 
 void Stm() : {}
@@ -243,13 +244,13 @@ void StmPrime() : {}
 void Expr() : {}
 {
     (Frag() Term())
-  | (Bool() Term())
   | (<LPAREN> Expr() <RPAREN> Term())
 }
 
 void Term() : {}
 {
-    [BinOp() Expr()]
+    BinOp() Expr()
+  | {}
 }
 
 void BinOp() : {}
@@ -260,14 +261,10 @@ void BinOp() : {}
 
 void Frag() : {}
 {
-    <ID> [<LPAREN> ArgList() <RPAREN>]
-  | <MINUS> <ID>
+    (<ID> [<LPAREN> ArgList() <RPAREN>])
+  | (<MINUS> <ID>)
   | <NUMBER>
-}
-
-void Bool() : {}
-{
-    <TRUE>
+  | <TRUE>
   | <FALSE>
 }
 
