@@ -39,12 +39,12 @@ public class CCALParser {
 
         } else {
     
-        System.out.println("CCAL Parser: Usage is one of:");
-        System.out.println("    java CCALParser < inputfile");
-        System.out.println("OR");
-        System.out.println("    java CCALParser inputfile");
-        return;
-    }
+            System.out.println("CCAL Parser: Usage is one of:");
+            System.out.println("    java CCALParser < inputfile");
+            System.out.println("OR");
+            System.out.println("    java CCALParser inputfile");
+            return;
+        }
 
 
     // Parse the file
